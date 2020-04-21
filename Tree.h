@@ -144,10 +144,4 @@ class Treap{
 				print(t -> right);
 			}
 		}
-		
-		int get_k_position(std::shared_ptr<Node>& t, int k){
-			if(k < get_size()) return get(t -> left, k);
-			else if(k == get_size(t -> left)) return t -> key;
-			else return get_k(t -> right, k - 1 - get_size(t -> left));
-		}
 };
