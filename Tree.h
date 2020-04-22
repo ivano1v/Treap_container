@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <memory>
 
@@ -17,9 +18,9 @@ class Treap{
 			int k = 0;
 			std::shared_ptr<Node> temp = tree;
 			while(temp != nullptr){
-				if(a == temp -> key)
+				if(a == temp -> _key)
 					return get_size(temp -> left) + k;
-				else if(a < temp -> key) 
+				else if(a < temp -> _key) 
 					temp = temp -> left;
 				else{
 					k += get_size(temp -> left) + 1;
@@ -30,43 +31,31 @@ class Treap{
 		}
 		
 		T at(int i){
-			try{
-				if(i > size())throw 1;
-				
-				int ii = i;
-				std::shared_ptr<Node> temp = tree;
-				while(true){
-					int left_size = get_size(temp) - get_size(temp -> right) - 1;
-					if(ii == left_size)
-						return temp -> _key;
-					if(ii < left_size)
-						temp = temp -> left;
-					else {
-						ii -= left_size + 1;
-						temp = temp -> right;
-					}
-				}
-			}
-			catch(int thr){
-				std::cout << "Error: " << thr;
-			}	
+			if(i > size())
+				throw std::out_of_range("Treap: index is out of range");	
+			std::shared_ptr<Node> temp = tree;
+			return get_k(temp, i);
 		}
 		
 		Treap<T> new_Treap(int pos){
 			Treap<T> new_tree;
 			for(int i = 0; i < pos; i++)
-				new_tree.insert(add(i));
+				new_tree.emplace(at(i));
 			return new_tree;
 		}
 		
-		template <typename T1>
-		void insert(T1&& new_T){
-        	add(tree, new_T);
+		void print(){
+			Print(tree);
+		}
+		
+		void insert(T a){
+        	add(tree, a);
    		}
    		template <class... Args>
 	    void emplace(Args...args){
 	        insert(T(args...));
 	    }
+	    
 	private:
 		class Node;
 		std::shared_ptr<Node>tree;
@@ -77,13 +66,9 @@ class Treap{
 			int _prior;   
 			std::shared_ptr<Node>left;
 			std::shared_ptr<Node>right;
-			Node(T& key, int prior = rand()%(1000000 + 1)): _key(key), _size(1), 
+			Node(T& key, int prior = rand()): _key(key), _size(1), 
 			right(nullptr), left(nullptr), _prior(prior){ }
 		};
-		
-		std::shared_ptr <Node> make_node(T& _key) const{
-			return std::make_shared<Node>(_key);
-		}
 		
 		int get_size(std::shared_ptr<Node>& node) const{
 			if(node == nullptr)return 0;
@@ -99,7 +84,7 @@ class Treap{
 			if (t1 == nullptr) { return t2; }
     		if (t2 == nullptr) { return t1; }
     		
-    		if(t1 -> _prior > t2 -> _prior){
+    		if(t1 -> _prior < t2 -> _prior){
     			t1 -> right = merge(t1 -> right, t2);
     			update(t1);
     			return t1;
@@ -118,6 +103,7 @@ class Treap{
 				return;
 			}
 			if(t -> _key < key){
+				
 				split(t -> right, key, t -> right, t2);
 				t1 = t;
 			}
@@ -129,19 +115,30 @@ class Treap{
 		}
 		
 		void add(std::shared_ptr<Node>& t, T& key){
-			std::shared_ptr<Node> t1;
-			std::shared_ptr<Node> t2;
+			std::shared_ptr<Node> t1, t2;
 			split(t, key, t1, t2);
-			std::shared_ptr<Node> temp_node = make_node(key);
-			std::shared_ptr<Node> temp = merge(t1, temp_node);
+			std::shared_ptr<Node> new_tree = std::make_shared<Node>(key);
+			std::shared_ptr<Node> temp = merge(t1, new_tree);
 			t = merge(temp, t2);
 		}
 		
-		void print(std::shared_ptr<Node>& t){
+		void Print(std::shared_ptr<Node>& t){
 			if(t != nullptr){
-				print(t -> left);
-				std:: cout << t -> key << " ";
-				print(t -> right);
+				Print(t -> left);
+				std::cout << t -> _key << " ";
+				Print(t -> right);
 			}
+		}
+		
+		T get_k(std::shared_ptr<Node>& t, int k){
+    		if (k < get_size(t -> left)){
+        		return get_k(t -> left, k);
+   			 }
+    		else if (k == get_size(t -> left)){
+        		return t -> _key;
+    		}
+    		else{
+       		 return get_k( t-> right, k - get_size(t -> left) - 1);
+   			}
 		}
 };
