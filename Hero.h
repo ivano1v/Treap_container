@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 
-class Hero{;
+class Hero{
 	public:
 		Hero(int hp = 100, int lvl = 1, std::string name= "default Hero"):
 		_hp(hp), _lvl(lvl),_name(name){ }
